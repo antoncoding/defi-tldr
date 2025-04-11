@@ -41,11 +41,14 @@ function getFaviconUrl(url: string) {
   }
 }
 
-export default async function SummaryPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+interface PageProps {
+  params: {
+    id: string;
+  };
+  searchParams: { [key: string]: string | string[] | undefined };
+}
+
+export default async function SummaryPage({ params, searchParams }: PageProps) {
   const summary = await getTagSummary(params.id);
   if (!summary) {
     return <div>Summary not found</div>;
@@ -67,17 +70,17 @@ export default async function SummaryPage({
         </div>
 
         <div className="mb-8">
-          <h2 className="text-xl font-medium text-gray-900 my-2">Summary</h2>
+          <h2 className="text-lg font-medium text-gray-900">Summary</h2>
           <ReactMarkdown>{summary.summary}</ReactMarkdown>
         </div>
 
         <div className="mb-8">
-          <h2 className="text-xl font-medium text-gray-900 my-2">Details</h2>
+          <h2 className="text-lg font-medium text-gray-900">Details</h2>
           <ReactMarkdown>{summary.detail}</ReactMarkdown>
         </div>
 
         <div className="not-prose">
-          <h2 className="text-xl font-medium text-gray-900 my-2">Sources ({newsItems.length})</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Sources ({newsItems.length})</h2>
           <div className="space-y-1">
             {newsItems.map((item) => {
               const faviconUrl = getFaviconUrl(item.url);
