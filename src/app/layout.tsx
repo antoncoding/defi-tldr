@@ -12,10 +12,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Crypto TLDR",
-  description: "Crypto TLDR is a tool that summarizes crypto news articles.",
-};
+export const metadata = {
+  title: 'DeFi TLDR',
+  description: 'Get concise summaries of the latest DeFi news and developments',
+}
 
 export default function RootLayout({
   children,

@@ -21,7 +21,7 @@ export default async function Home() {
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-medium mb-6">Latest Summaries</h1>
+      <h1 className="text-2xl font-medium mb-6">DeFi TLDR</h1>
       <div className="divide-y divide-gray-200">
         {summaries.map((summary) => (
           <TagSummaryCard key={summary.id} summary={summary} />

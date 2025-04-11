@@ -1,6 +1,16 @@
-# Next.js Supabase App
+# DeFi TLDR
 
-A simple Next.js application that connects to Supabase to display entries.
+A Next.js application that provides concise summaries of DeFi (Decentralized Finance) news and developments. The app aggregates news from various sources, groups them by topics, and provides clear, digestible summaries.
+
+## Features
+
+- Aggregated DeFi news summaries
+- Topic-based categorization
+- Markdown support for rich content
+- Source linking with favicons
+- Clean, minimal interface
+- Built with Next.js 14 and TypeScript
+- Powered by Supabase
 
 ## Setup
 
@@ -9,26 +19,63 @@ A simple Next.js application that connects to Supabase to display entries.
    ```bash
    pnpm install
    ```
-3. Copy `.env.example` to `.env.local` and fill in your Supabase credentials:
+3. Copy `.env.example` to `.env` and fill in your Supabase credentials:
    ```bash
-   cp .env.example .env.local
+   cp .env.example .env
    ```
-4. Update the `.env.local` file with:
+4. Update the `.env` file with:
    - `SUPABASE_URL`: Your Supabase project URL
    - `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase service role key (keep this secret!)
-   - `NEXT_PUBLIC_BASE_URL`: Your application's base URL (e.g., http://localhost:3000 for development)
 5. Run the development server:
    ```bash
    pnpm dev
    ```
 
-## Features
+## Tech Stack
 
 - Next.js 14 with App Router
 - TypeScript for type safety
-- Secure Supabase integration through API routes
+- Supabase for database
 - Tailwind CSS for styling
-- ESLint for code quality
+- React Markdown for content rendering
+
+## Database Schema
+
+The application uses the following main tables in Supabase:
+
+### Tag Summaries
+Stores aggregated news summaries by topic:
+- `id` (uuid, primary key)
+- `tag_name` (text)
+- `title` (text)
+- `summary` (text)
+- `detail` (text)
+- `news_ids` (uuid[])
+- `created_at` (timestamp)
+
+### News Items
+Stores individual news articles:
+- `id` (uuid, primary key)
+- `title` (text)
+- `url` (text)
+- `content` (text)
+- `summary` (text)
+- `published_at` (timestamp)
+- `source` (text)
+- `topics` (jsonb)
+
+## Development
+
+This project uses:
+- [Next.js](https://nextjs.org) - React framework
+- [Tailwind CSS](https://tailwindcss.com) - Styling
+- [Supabase](https://supabase.com) - Database
+- [TypeScript](https://www.typescriptlang.org) - Type safety
+- [React Markdown](https://github.com/remarkjs/react-markdown) - Markdown rendering
+
+## License
+
+MIT
 
 ## Security
 
