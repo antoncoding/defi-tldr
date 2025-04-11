@@ -2,7 +2,7 @@ import TagSummaryCard from './components/TagSummaryCard';
 import { TagSummary } from '@/types/database';
 
 async function getTagSummaries() {
-  const res = await fetch('/api/summaries', {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/summaries`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

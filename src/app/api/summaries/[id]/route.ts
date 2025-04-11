@@ -1,15 +1,18 @@
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
+    const id = request.nextUrl.pathname.split('/').pop();
+    if (!id) {
+      return NextResponse.json({ error: 'Summary ID is required' }, { status: 400 });
+    }
+
     const { data: summary, error: summaryError } = await supabase
       .from('tag_summaries')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (summaryError) throw summaryError;
@@ -27,7 +30,7 @@ export async function GET(
 
     return NextResponse.json({
       summary,
-      newsItems: newsItems || [],
+      newsItems: newsItems || []
     });
   } catch (error) {
     console.error('API Error:', error);

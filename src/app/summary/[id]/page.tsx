@@ -1,8 +1,11 @@
+'use client';
+
 import { TagSummary, NewsItem } from '@/types/database';
 import Link from 'next/link';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 function getFaviconUrl(url: string) {
   try {
@@ -14,7 +17,8 @@ function getFaviconUrl(url: string) {
 }
 
 async function getSummaryData(id: string) {
-  const res = await fetch(`/api/summaries/${id}`, {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const res = await fetch(`${baseUrl}/api/summaries/${id}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -34,14 +38,39 @@ async function getSummaryData(id: string) {
   }>;
 }
 
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
+export default function SummaryPage() {
+  const params = useParams();
+  const id = params.id as string;
+  const [data, setData] = useState<{ summary: TagSummary; newsItems: NewsItem[] } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-export default async function SummaryPage({ params }: PageProps) {
-  const { summary, newsItems } = await getSummaryData(params.id);
+  useEffect(() => {
+    if (!id) {
+      notFound();
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        const response = await getSummaryData(id);
+        setData(response);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch summary');
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
+  if (error) {
+    return <div className="max-w-3xl mx-auto px-4 py-8">Error: {error}</div>;
+  }
+
+  if (!data) {
+    return <div className="max-w-3xl mx-auto px-4 py-8">Loading...</div>;
+  }
+
+  const { summary, newsItems } = data;
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-8">
