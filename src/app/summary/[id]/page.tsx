@@ -1,36 +1,8 @@
-import { supabase } from '@/lib/supabase';
 import { TagSummary, NewsItem } from '@/types/database';
 import Link from 'next/link';
+import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
-
-async function getTagSummary(id: string) {
-  const { data, error } = await supabase
-    .from('tag_summaries')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (error) {
-    console.error('Error fetching tag summary:', error);
-    return null;
-  }
-
-  return data as TagSummary;
-}
-
-async function getNewsItems(newsIds: string[]) {
-  const { data, error } = await supabase
-    .from('news_items')
-    .select('*')
-    .in('id', newsIds);
-
-  if (error) {
-    console.error('Error fetching news items:', error);
-    return [];
-  }
-
-  return data as NewsItem[];
-}
+import { notFound } from 'next/navigation';
 
 function getFaviconUrl(url: string) {
   try {
@@ -41,20 +13,35 @@ function getFaviconUrl(url: string) {
   }
 }
 
+async function getSummaryData(id: string) {
+  const res = await fetch(`/api/summaries/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!res.ok) {
+    if (res.status === 404) {
+      notFound();
+    }
+    throw new Error('Failed to fetch summary');
+  }
+
+  return res.json() as Promise<{
+    summary: TagSummary;
+    newsItems: NewsItem[];
+  }>;
+}
+
 interface PageProps {
   params: {
     id: string;
   };
-  searchParams: { [key: string]: string | string[] | undefined };
 }
 
-export default async function SummaryPage({ params, searchParams }: PageProps) {
-  const summary = await getTagSummary(params.id);
-  if (!summary) {
-    return <div>Summary not found</div>;
-  }
-
-  const newsItems = await getNewsItems(summary.news_ids);
+export default async function SummaryPage({ params }: PageProps) {
+  const { summary, newsItems } = await getSummaryData(params.id);
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-8">
@@ -93,10 +80,12 @@ export default async function SummaryPage({ params, searchParams }: PageProps) {
                   className="flex items-center gap-2 py-1 hover:bg-gray-50 group"
                 >
                   {faviconUrl && (
-                    <img
+                    <Image
                       src={faviconUrl}
                       alt=""
-                      className="w-3.5 h-3.5 flex-shrink-0"
+                      width={14}
+                      height={14}
+                      className="flex-shrink-0"
                     />
                   )}
                   <span className="text-sm text-gray-900 truncate group-hover:underline flex-grow">

@@ -1,19 +1,20 @@
-import { supabase } from '@/lib/supabase';
 import TagSummaryCard from './components/TagSummaryCard';
 import { TagSummary } from '@/types/database';
 
 async function getTagSummaries() {
-  const { data, error } = await supabase
-    .from('tag_summaries')
-    .select('*')
-    .order('created_at', { ascending: false });
+  const res = await fetch('/api/summaries', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-  if (error) {
-    console.error('Error fetching tag summaries:', error);
+  if (!res.ok) {
+    console.error('Error fetching tag summaries');
     return [];
   }
 
-  return data as TagSummary[];
+  return res.json() as Promise<TagSummary[]>;
 }
 
 export default async function Home() {
