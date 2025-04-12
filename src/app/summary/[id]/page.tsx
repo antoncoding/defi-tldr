@@ -4,8 +4,11 @@ import { TagSummary, NewsItem } from '@/types/database';
 import Link from 'next/link';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { notFound, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import moment from 'moment';
+import { Components } from 'react-markdown';
 
 function getFaviconUrl(url: string) {
   try {
@@ -37,6 +40,21 @@ async function getSummaryData(id: string) {
     newsItems: NewsItem[];
   }>;
 }
+
+const markdownComponents: Components = {
+  h1: ({ children }) => <h1 className="text-4xl font-bold mb-4">{children}</h1>,
+  h2: ({ children }) => <h2 className="text-3xl font-semibold mb-3">{children}</h2>,
+  h3: ({ children }) => <h3 className="text-2xl font-semibold mb-2">{children}</h3>,
+  p: ({ children }) => <p className="mb-4 leading-relaxed">{children}</p>,
+  ul: ({ children }) => <ul className="list-disc pl-6 mb-4">{children}</ul>,
+  ol: ({ children }) => <ol className="list-decimal pl-6 mb-4">{children}</ol>,
+  li: ({ children }) => <li className="mb-2">{children}</li>,
+  a: ({ href, children }) => (
+    <a href={href} className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">
+      {children}
+    </a>
+  ),
+};
 
 export default function SummaryPage() {
   const params = useParams();
@@ -78,22 +96,34 @@ export default function SummaryPage() {
         ← Back to summaries
       </Link>
       
-      <article className="prose lg:prose-lg max-w-none">
+      <article className="prose prose-lg max-w-none">
         <h1 className="text-4xl font-medium">{summary.title}</h1>
         <div className="flex items-center gap-4 text-sm text-gray-500 not-prose mb-8">
           <span>{summary.tag_name}</span>
-          <span>{new Date(summary.created_at).toLocaleDateString()}</span>
+          <span>{moment(summary.created_at).fromNow()}</span>
         </div>
 
-        <div className="mb-8">
-          <h2 className="text-lg font-medium text-gray-900">Summary</h2>
-          <ReactMarkdown>{summary.summary}</ReactMarkdown>
+        <div className="prose prose-lg">
+          <ReactMarkdown 
+            remarkPlugins={[remarkGfm]}
+            components={markdownComponents}
+          >
+            {summary.summary}
+          </ReactMarkdown>
         </div>
 
-        <div className="mb-8">
-          <h2 className="text-lg font-medium text-gray-900">Details</h2>
-          <ReactMarkdown>{summary.detail}</ReactMarkdown>
+        <div className="border-t border-gray-200 my-8"></div>
+
+        <div className="prose prose-lg">
+          <ReactMarkdown 
+            remarkPlugins={[remarkGfm]}
+            components={markdownComponents}
+          >
+            {summary.detail}
+          </ReactMarkdown>
         </div>
+
+        <div className="border-t border-gray-200 my-8"></div>
 
         <div className="not-prose">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Sources ({newsItems.length})</h2>

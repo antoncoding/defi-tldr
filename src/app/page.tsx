@@ -1,8 +1,13 @@
+'use client';
+
 import TagSummaryCard from './components/TagSummaryCard';
 import { TagSummary } from '@/types/database';
+import { useEffect, useState } from 'react';
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
 async function getTagSummaries() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/summaries`, {
+  const res = await fetch(`${baseUrl}/api/summaries`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -17,8 +22,26 @@ async function getTagSummaries() {
   return res.json() as Promise<TagSummary[]>;
 }
 
-export default async function Home() {
-  const summaries = await getTagSummaries();
+export default function Home() {
+  const [summaries, setSummaries] = useState<TagSummary[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getTagSummaries();
+        setSummaries(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch summaries');
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (error) {
+    return <div className="max-w-3xl mx-auto px-4 py-8">Error: {error}</div>;
+  }
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-8">

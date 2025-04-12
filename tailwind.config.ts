@@ -7,7 +7,44 @@ const config: Config = {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      typography: {
+        DEFAULT: {
+          css: {
+            h1: {
+              fontSize: '2.25rem',
+              fontWeight: '600',
+              marginTop: '2rem',
+              marginBottom: '1rem',
+            },
+            h2: {
+              fontSize: '1.875rem',
+              fontWeight: '600',
+              marginTop: '2rem',
+              marginBottom: '1rem',
+            },
+            h3: {
+              fontSize: '1.5rem',
+              fontWeight: '600',
+              marginTop: '1.5rem',
+              marginBottom: '0.75rem',
+            },
+            p: {
+              marginTop: '1.25rem',
+              marginBottom: '1.25rem',
+            },
+            'ul, ol': {
+              marginTop: '1.25rem',
+              marginBottom: '1.25rem',
+            },
+            li: {
+              marginTop: '0.5rem',
+              marginBottom: '0.5rem',
+            },
+          },
+        },
+      },
+    },
   },
   plugins: [
     require('@tailwindcss/typography'),
