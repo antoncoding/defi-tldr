@@ -1,20 +1,15 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata = {
-  title: 'Crypto TLDR',
-  description: 'Get concise summaries of the latest DeFi news and developments',
-}
+export const metadata: Metadata = {
+  title: "Crypto TLDR",
+  description: "Concise crypto news summaries",
+};
 
 export default function RootLayout({
   children,
@@ -23,10 +18,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body className={`${inter.className} bg-gray-50 flex flex-col min-h-screen`}>
+        <Navbar />
+        <main className="flex-grow w-full">
+          {children} 
+        </main>
+        <Footer />
       </body>
     </html>
   );

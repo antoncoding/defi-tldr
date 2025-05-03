@@ -132,21 +132,37 @@ export default function Home() {
     return items;
   };
 
+  // This part remains outside the loading check
+  const renderHeader = () => (
+    <>
+      <h1 className="text-4xl font-medium mb-2">Crypto TLDR</h1>
+      <p className="text-lg text-gray-600 mb-8">Your daily dose of concise crypto news summaries.</p>
+    </>
+  );
+
   if (loading && summaries.length === 0) {
     return (
-      <main className="flex items-center justify-center min-h-screen">
-        <ScaleLoader color="#14B8A6" />
-      </main>
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        {renderHeader()}
+        <div className="flex items-center justify-center min-h-[calc(100vh-20rem)]">
+          <ScaleLoader color="#14B8A6" />
+        </div>
+      </div>
     );
   }
 
   if (error && summaries.length === 0) {
-    return <div className="max-w-3xl mx-auto px-4 py-8">Error: {error}</div>;
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-8">
+         {renderHeader()}
+         <div className="text-red-500 text-center py-4">Error: {error}</div>
+      </div>
+    );
   }
 
   return (
-    <main className="max-w-3xl mx-auto px-4 py-8 min-h-screen">
-      <h1 className="text-4xl font-medium mb-6">Crypto TLDR</h1>
+    <div className="max-w-3xl mx-auto px-4 py-8">
+      {renderHeader()}
       
       <div className={`transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100'}`}>
           <div className="divide-y divide-gray-200">
@@ -183,6 +199,6 @@ export default function Home() {
              <p className="text-center text-gray-500 mt-6">No summaries found.</p>
           )}
       </div>
-    </main>
+    </div>
   );
 }

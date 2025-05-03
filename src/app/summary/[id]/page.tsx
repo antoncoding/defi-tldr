@@ -8,6 +8,7 @@ import { notFound, useParams } from 'next/navigation';
 import { useEffect } from 'react'; // Keep useEffect for notFound check
 import moment from 'moment';
 import { ScaleLoader } from 'react-spinners';
+import { ArrowLeft } from 'lucide-react';
 import TableOfContents from '@/components/TableOfContents';
 import { useSummaryPageLogic } from '@/hooks/useSummaryPageLogic';
 
@@ -53,9 +54,9 @@ export default function SummaryPage() {
 
   if (loading && !data) { // Show loader only on initial load
     return (
-      <main className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-[calc(100vh-12rem)]">
         <ScaleLoader color="#14B8A6" />
-      </main>
+      </div>
     );
   }
 
@@ -73,9 +74,9 @@ export default function SummaryPage() {
   const { summary, newsItems } = data;
 
   return (
-    <main className="max-w-3xl mx-auto px-4 py-8 min-h-screen relative">
-      <Link href="/" className="text-blue-600 hover:underline mb-8 block">
-        ← Back
+    <div className="max-w-3xl mx-auto px-4 py-8 relative">
+      <Link href="/" className="text-teal-600 hover:text-teal-700 mb-8 block w-fit">
+        <ArrowLeft size={20} />
       </Link>
       
       {/* Pass setActiveId to ToC */}
@@ -183,6 +184,6 @@ export default function SummaryPage() {
           </>
         )}
       </article>
-    </main>
+    </div>
   );
 } 
