@@ -1,4 +1,4 @@
-# DeFi TLDR
+# Crypto TLDR
 
 A Next.js application that provides concise summaries of DeFi (Decentralized Finance) news and developments. The app aggregates news from various sources, groups them by topics, and provides clear, digestible summaries.
 

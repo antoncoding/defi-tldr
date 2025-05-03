@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: 'DeFi TLDR',
+  title: 'Crypto TLDR',
   description: 'Get concise summaries of the latest DeFi news and developments',
 }
 

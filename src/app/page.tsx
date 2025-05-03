@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/pagination";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 async function getTagSummaries(page: number, limit: number): Promise<{ data: TagSummary[]; count: number | null }> {
   const res = await fetch(`${baseUrl}/api/summaries?page=${page}&limit=${limit}`, {
@@ -146,7 +146,7 @@ export default function Home() {
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-8 min-h-screen">
-      <h1 className="text-4xl font-medium mb-6">DeFi TLDR</h1>
+      <h1 className="text-4xl font-medium mb-6">Crypto TLDR</h1>
       
       <div className={`transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100'}`}>
           <div className="divide-y divide-gray-200">
