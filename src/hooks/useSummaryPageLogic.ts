@@ -52,7 +52,7 @@ export function useSummaryPageLogic(id: string | undefined) {
   const [headings, setHeadings] = useState<Heading[]>([]);
   const [activeHeadingId, setActiveHeadingId] = useState<string | null>(null);
 
-  const newsItems = data?.newsItems || [];
+  const newsItems = useMemo(() => data?.newsItems || [], [data?.newsItems]);
 
   // Fetch Data Effect
   useEffect(() => {
@@ -182,7 +182,7 @@ export function useSummaryPageLogic(id: string | undefined) {
     });
 
   // Depend on the elements that contribute to headings
-  }, [data?.summary?.title, data?.summary?.summary, data?.summary?.detail, newsItems, activeHeadingId]); // Added activeHeadingId dependency
+  }, [data, activeHeadingId, newsItems.length]);
 
 
   // Intersection Observer Effect
