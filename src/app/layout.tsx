@@ -18,7 +18,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <link rel="icon" href="/favicon.ico" sizes="any" />
+      {/* The link tag below will be removed */}
+      {/* <link rel="icon" href="/favicon.ico" sizes="any" /> */}
       <body className={`${inter.className} bg-gray-50 flex flex-col min-h-screen`}>
         <Navbar />
         <main className="flex-grow w-full">
