@@ -1,5 +1,6 @@
 import type { Config } from 'tailwindcss';
 import colors from 'tailwindcss/colors';
+import defaultTheme from 'tailwindcss/defaultTheme';
 
 const config: Config = {
   content: [
@@ -12,6 +13,12 @@ const config: Config = {
       colors: {
         primary: {
           DEFAULT: colors.teal[500],
+          darker: colors.teal[600],
+        },
+        brand: colors.blue,
+        "brand-hover": colors.blue[700],
+        teal: {
+          lighter: colors.teal[100],
           darker: colors.teal[600],
         },
       },
@@ -50,6 +57,10 @@ const config: Config = {
             },
           },
         },
+      },
+      fontFamily: {
+        sans: ['var(--font-fk-grotesk)', ...defaultTheme.fontFamily.sans],
+        inter: ['var(--font-inter)', ...defaultTheme.fontFamily.sans],
       },
     },
   },

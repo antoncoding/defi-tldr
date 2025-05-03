@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
+import { inter, fkGrotesk } from "@/app/fonts"; 
+import "@/app/globals.css";
+import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Crypto TLDR",
@@ -17,10 +17,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn(
+        "min-h-screen bg-background font-sans antialiased",
+        // Use imported font variables
+        fkGrotesk.variable,
+        inter.variable
+      )}
+    >
       {/* The link tag below will be removed */}
       {/* <link rel="icon" href="/favicon.ico" sizes="any" /> */}
-      <body className={`${inter.className} bg-gray-50 flex flex-col min-h-screen`}>
+      <body className="bg-gray-50 flex flex-col min-h-screen">
         <Navbar />
         <main className="flex-grow w-full">
           {children} 

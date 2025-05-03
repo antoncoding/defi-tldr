@@ -129,7 +129,7 @@ export default function SummaryPage() {
                   <button
                     key={domain}
                     onClick={() => setExpandedDomain(expandedDomain === domain ? null : domain)}
-                    className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs border transition-colors duration-150 ${
+                    className={`font-inter flex items-center gap-1.5 px-2 rounded-full text-xs border transition-colors duration-150 h-6 ${
                       expandedDomain === domain
                         ? 'bg-gray-200 border-gray-400'
                         : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
@@ -143,8 +143,8 @@ export default function SummaryPage() {
                         height={12}
                       />
                     )}
-                    <span className="font-medium">{domain}</span>
-                    <span className="text-gray-600">({items.length})</span>
+                    <span className="font-medium line-clamp-1">{domain}</span>
+                    <span className="text-gray-600 ml-0.5">({items.length})</span>
                   </button>
                 ))}
               </div>
