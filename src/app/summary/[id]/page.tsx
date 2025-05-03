@@ -11,7 +11,7 @@ import moment from 'moment';
 import { Components } from 'react-markdown';
 import { ScaleLoader } from 'react-spinners';
 
-function getFaviconUrl(url: string) {
+function getFaviconUrl(url: string): string | null {
   try {
     const domain = new URL(url).hostname;
     return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
@@ -63,6 +63,7 @@ export default function SummaryPage() {
   const [data, setData] = useState<{ summary: TagSummary; newsItems: NewsItem[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [expandedDomain, setExpandedDomain] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) {
@@ -106,6 +107,23 @@ export default function SummaryPage() {
 
   const { summary, newsItems } = data;
 
+  const groupedSources = newsItems.reduce((acc, item) => {
+    try {
+      const domain = new URL(item.url).hostname;
+      if (!acc[domain]) {
+        acc[domain] = { items: [], favicon: getFaviconUrl(item.url) };
+      }
+      acc[domain].items.push(item);
+    } catch (e) {
+      console.error("Invalid URL:", item.url, e);
+    }
+    return acc;
+  }, {} as Record<string, { items: NewsItem[]; favicon: string | null }>);
+
+  const sortedDomains = Object.entries(groupedSources)
+    .sort(([, a], [, b]) => b.items.length - a.items.length)
+    .map(([domain, data]) => ({ domain, ...data }));
+
   return (
     <main className="max-w-3xl mx-auto px-4 py-8 min-h-screen">
       <Link href="/" className="text-blue-600 hover:underline mb-8 block">
@@ -141,28 +159,53 @@ export default function SummaryPage() {
 
         <div className="border-t border-gray-200 my-8"></div>
 
-        <div className="not-prose">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Sources ({newsItems.length})</h2>
-          <div className="space-y-1">
-            {newsItems.map((item) => {
-              const faviconUrl = getFaviconUrl(item.url);
-              return (
+        <div className="not-prose mb-8">
+          <div className="flex flex-wrap gap-2 justify-end mb-4">
+            {sortedDomains.map(({ domain, items, favicon }) => (
+              <button
+                key={domain}
+                onClick={() => setExpandedDomain(expandedDomain === domain ? null : domain)}
+                className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs border transition-colors duration-150 ${
+                  expandedDomain === domain
+                    ? 'bg-gray-200 border-gray-400'
+                    : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                }`}
+              >
+                {favicon && (
+                  <Image
+                    src={favicon}
+                    alt={`${domain} favicon`}
+                    width={12}
+                    height={12}
+                  />
+                )}
+                <span className="font-medium">{domain}</span>
+                <span className="text-gray-600">({items.length})</span>
+              </button>
+            ))}
+          </div>
+
+          {expandedDomain && groupedSources[expandedDomain] && (
+            <div className="mt-6 space-y-1 border-t pt-4">
+              <h3 className="text-md font-medium text-gray-800 mb-3 flex items-center gap-2">
+                {groupedSources[expandedDomain].favicon && (
+                  <Image
+                    src={groupedSources[expandedDomain].favicon!}
+                    alt={`${expandedDomain} favicon`}
+                    width={16}
+                    height={16}
+                  />
+                )}
+                Sources from {expandedDomain}
+              </h3>
+              {groupedSources[expandedDomain].items.map((item) => (
                 <a
                   key={item.id}
                   href={item.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 py-1 hover:bg-gray-50 group"
+                  className="flex items-center gap-2 py-1 hover:bg-gray-50 group pl-2"
                 >
-                  {faviconUrl && (
-                    <Image
-                      src={faviconUrl}
-                      alt=""
-                      width={14}
-                      height={14}
-                      className="flex-shrink-0"
-                    />
-                  )}
                   <span className="text-sm text-gray-900 truncate group-hover:underline flex-grow">
                     {item.title}
                   </span>
@@ -170,9 +213,9 @@ export default function SummaryPage() {
                     {new Date(item.published_at).toLocaleDateString()}
                   </span>
                 </a>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </article>
     </main>
