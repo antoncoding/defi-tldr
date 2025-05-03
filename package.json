@@ -11,8 +11,10 @@
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.0",
     "@supabase/supabase-js": "^2.49.4",
+    "@types/lodash": "^4.17.16",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.507.0",
     "moment": "^2.30.1",
     "next": "15.3.0",
