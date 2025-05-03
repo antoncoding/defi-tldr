@@ -9,6 +9,7 @@ import { notFound, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import moment from 'moment';
 import { Components } from 'react-markdown';
+import { ScaleLoader } from 'react-spinners';
 
 function getFaviconUrl(url: string) {
   try {
@@ -61,37 +62,52 @@ export default function SummaryPage() {
   const id = params.id as string;
   const [data, setData] = useState<{ summary: TagSummary; newsItems: NewsItem[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!id) {
+      setLoading(false);
       notFound();
       return;
     }
 
     const fetchData = async () => {
+      setLoading(true);
+      setError(null);
       try {
         const response = await getSummaryData(id);
         setData(response);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch summary');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
   }, [id]);
 
+  if (loading) {
+    return (
+      <main className="flex items-center justify-center min-h-screen">
+        <ScaleLoader color="#4A90E2" />
+      </main>
+    );
+  }
+
   if (error) {
     return <div className="max-w-3xl mx-auto px-4 py-8">Error: {error}</div>;
   }
 
   if (!data) {
-    return <div className="max-w-3xl mx-auto px-4 py-8">Loading...</div>;
+    notFound();
+    return null;
   }
 
   const { summary, newsItems } = data;
 
   return (
-    <main className="max-w-3xl mx-auto px-4 py-8">
+    <main className="max-w-3xl mx-auto px-4 py-8 min-h-screen">
       <Link href="/" className="text-blue-600 hover:underline mb-8 block">
         ← Back to summaries
       </Link>
