@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Zap } from 'lucide-react'; // Example icon
+import { Zap } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   return (
