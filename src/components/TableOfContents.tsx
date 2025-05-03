@@ -9,9 +9,10 @@ interface Heading {
 interface TableOfContentsProps {
   headings: Heading[];
   activeId: string | null;
+  setActiveId: (id: string | null) => void;
 }
 
-const TableOfContents: React.FC<TableOfContentsProps> = ({ headings, activeId }) => {
+const TableOfContents: React.FC<TableOfContentsProps> = ({ headings, activeId, setActiveId }) => {
   // Filter for H1, H2, H3 only, including the manually added "introduction"
   const filteredHeadings = headings.filter(h => h.level <= 3 || h.id === 'introduction');
 
@@ -21,6 +22,8 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ headings, activeId })
 
   const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
+    setActiveId(id);
+
     const element = document.getElementById(id);
     if (element) {
         // Calculate offset if needed (e.g., for fixed header)

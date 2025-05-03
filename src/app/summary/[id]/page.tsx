@@ -1,65 +1,15 @@
 'use client';
 
-import { TagSummary, NewsItem } from '@/types/database';
 import Link from 'next/link';
 import Image from 'next/image';
 import ReactMarkdown, { Components as MarkdownComponents } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { notFound, useParams } from 'next/navigation';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect } from 'react'; // Keep useEffect for notFound check
 import moment from 'moment';
 import { ScaleLoader } from 'react-spinners';
 import TableOfContents from '@/components/TableOfContents';
-import { throttle } from 'lodash';
-
-function getFaviconUrl(url: string): string | null {
-  try {
-    const domain = new URL(url).hostname;
-    return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
-  } catch {
-    return null;
-  }
-}
-
-async function getSummaryData(id: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-  const res = await fetch(`${baseUrl}/api/summaries/${id}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  if (!res.ok) {
-    if (res.status === 404) {
-      notFound();
-    }
-    throw new Error('Failed to fetch summary');
-  }
-
-  return res.json() as Promise<{
-    summary: TagSummary;
-    newsItems: NewsItem[];
-  }>;
-}
-
-// Helper to generate slugs
-const generateSlug = (text: string) => {
-  if (!text) return 'heading-' + Math.random().toString(36).substring(7);
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove markdown links, keep text
-    .replace(/[^\w\s-]/g, '') // Remove non-word chars
-    .replace(/\s+/g, '-') // Replace spaces with hyphens
-    .replace(/-+/g, '-'); // Replace multiple hyphens with single
-};
-
-interface Heading {
-  id: string;
-  level: number;
-  text: string;
-}
+import { useSummaryPageLogic } from '@/hooks/useSummaryPageLogic';
 
 // Base components just for styling (no collection/ID logic)
 const baseMarkdownComponents: MarkdownComponents = {
@@ -80,191 +30,28 @@ const baseMarkdownComponents: MarkdownComponents = {
 export default function SummaryPage() {
   const params = useParams();
   const id = params.id as string;
-  const [data, setData] = useState<{ summary: TagSummary; newsItems: NewsItem[] } | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [expandedDomain, setExpandedDomain] = useState<string | null>(null);
-  const [headings, setHeadings] = useState<Heading[]>([]);
-  const [activeHeadingId, setActiveHeadingId] = useState<string | null>(null);
-  
-  // --- Moved Hooks (groupedSources, sortedDomains) --- 
-  const newsItems = data?.newsItems || []; 
-  const groupedSources = useMemo(() => {
-    return newsItems.reduce((acc, item) => {
-        try {
-          const domain = new URL(item.url).hostname;
-          if (!acc[domain]) {
-            acc[domain] = { items: [], favicon: getFaviconUrl(item.url) };
-          }
-          acc[domain].items.push(item);
-        } catch (e) {
-          console.error("Invalid URL:", item.url, e);
-        }
-        return acc;
-      }, {} as Record<string, { items: NewsItem[]; favicon: string | null }>);
-  }, [newsItems]); 
-  const sortedDomains = useMemo(() => {
-    return Object.entries(groupedSources)
-    .sort(([, a], [, b]) => b.items.length - a.items.length)
-    .map(([domain, data]) => ({ domain, ...data }));
-  }, [groupedSources]); 
 
+  const {
+    data,
+    loading,
+    error,
+    headings,
+    activeHeadingId,
+    setActiveHeadingId, // Get setter from hook
+    groupedSources,
+    sortedDomains,
+    expandedDomain,
+    setExpandedDomain,
+  } = useSummaryPageLogic(id);
+
+  // Handle notFound based on error state from hook
   useEffect(() => {
-    if (!data) return;
-
-    const articleElement = document.getElementById('article-content');
-    if (!articleElement) return;
-
-    const headingNodes = articleElement.querySelectorAll('h1, h2, h3');
-    const foundHeadings: Heading[] = [];
-    const slugCounts = new Map<string, number>();
-
-    headingNodes.forEach(node => {
-      const level = parseInt(node.tagName.substring(1), 10);
-      // Use textContent, trim whitespace
-      const text = node.textContent?.trim() || ''; 
-      if (!text) return; // Skip empty headings
-
-      let originalSlug = generateSlug(text);
-      let finalId = originalSlug;
-      const count = slugCounts.get(originalSlug) || 0;
-      if (count > 0) {
-        finalId = `${originalSlug}-${count}`;
-      }
-      slugCounts.set(originalSlug, count + 1);
-
-      // Set the ID directly on the DOM element
-      node.id = finalId; 
-
-      foundHeadings.push({ id: finalId, level, text });
-    });
-
-    // --- Build final list --- 
-    const introId = 'introduction'; // ID for the main title H1
-    const finalHeadings: Heading[] = [
-      { id: introId, level: 1, text: data.summary.title },
-      ...foundHeadings,
-    ];
-
-    if (newsItems.length > 0) {
-      finalHeadings.push({ id: 'sources', level: 2, text: 'Sources' });
-    }
-
-    // Update state only if headings changed
-    setHeadings(prevHeadings => {
-      if (JSON.stringify(prevHeadings) !== JSON.stringify(finalHeadings)) {
-         // Set initial active ID only when headings *actually* change
-         const initialHash = window.location.hash.substring(1);
-         const currentActiveIsValid = finalHeadings.some(h => h.id === activeHeadingId);
-         let nextActiveId = activeHeadingId;
-         if (initialHash && finalHeadings.some(h => h.id === initialHash)) {
-            nextActiveId = initialHash;
-         } else if (!currentActiveIsValid || activeHeadingId === null) { // Explicitly check null
-            nextActiveId = finalHeadings.length > 0 ? finalHeadings[0].id : null;
-         }
-         if(activeHeadingId !== nextActiveId) setActiveHeadingId(nextActiveId);
-
-         return finalHeadings;
-      }
-      return prevHeadings;
-    });
-
-  // Depend on the markdown content fields 
-  }, [data?.summary?.summary, data?.summary?.detail, data?.summary?.title, newsItems]); 
-
-  // --- IntersectionObserver Logic (Unchanged, uses `headings`) --- 
-  useEffect(() => {
-    if (headings.length === 0) return;
-
-    const observerCallback = (entries: IntersectionObserverEntry[]) => {
-      // Keep track of headings currently intersecting above the threshold
-      const intersectingHeadings: { id: string; top: number }[] = [];
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          // Add intersecting elements to our list
-          intersectingHeadings.push({
-            id: entry.target.id,
-            top: entry.boundingClientRect.top,
-          });
-        }
-      });
-
-      if (intersectingHeadings.length > 0) {
-        // Sort by position on screen (topmost first)
-        intersectingHeadings.sort((a, b) => a.top - b.top);
-        // Set the topmost intersecting heading as active
-        setActiveHeadingId(intersectingHeadings[0].id);
-      } else {
-        // Optional: If nothing is intersecting within the top margin,
-        // check which was the *last* active heading based on scroll position.
-        // Find the last heading whose top is above the root margin threshold.
-        let lastVisibleId = null;
-        for (let i = headings.length - 1; i >= 0; i--) {
-            const element = document.getElementById(headings[i].id);
-            if (element) {
-                // The observer's rootMargin is '-80px 0px -40% 0px', so we check if the element is above the -80px top margin.
-                if (element.getBoundingClientRect().top < 80) { 
-                    lastVisibleId = headings[i].id;
-                    break;
-                }
-            }
-        }
-        if (lastVisibleId) {
-            setActiveHeadingId(lastVisibleId);
-        }
-      }
-    };
-
-    const observerOptions = {
-      rootMargin: '-80px 0px -40% 0px', // Top: 80px offset, Bottom: trigger 40% from bottom
-      threshold: 0.1 // Trigger when 10% is visible - adjust if needed
-    };
-
-    const observer = new IntersectionObserver(observerCallback, observerOptions);
-
-    // Observe all heading elements
-    headings.forEach(heading => {
-      const element = document.getElementById(heading.id);
-      if (element) {
-        observer.observe(element);
-      }
-    });
-
-    // Cleanup function
-    return () => {
-      headings.forEach(heading => {
-        const element = document.getElementById(heading.id);
-        if (element) {
-          observer.unobserve(element);
-        }
-      });
-    };
-  }, [headings]); 
-
-  useEffect(() => {
-    if (!id) {
-      setLoading(false);
+    if (!loading && error === 'Summary not found') {
       notFound();
-      return;
     }
+  }, [loading, error]);
 
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await getSummaryData(id);
-        setData(response);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch summary');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [id]);
-
-  if (loading) {
+  if (loading && !data) { // Show loader only on initial load
     return (
       <main className="flex items-center justify-center min-h-screen">
         <ScaleLoader color="#14B8A6" />
@@ -272,16 +59,18 @@ export default function SummaryPage() {
     );
   }
 
-  if (error) {
+  if (error && error !== 'Summary not found') { // Show other errors
     return <div className="max-w-3xl mx-auto px-4 py-8">Error: {error}</div>;
   }
 
   if (!data) {
-    notFound();
-    return null;
+     // If not loading, no data, and not a 'not found' error, something else is wrong.
+     // Or could have already triggered notFound(). Render null or a generic error.
+    return null; 
   }
 
-  const { summary } = data;
+  // Destructure after data check
+  const { summary, newsItems } = data;
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-8 min-h-screen relative">
@@ -289,9 +78,15 @@ export default function SummaryPage() {
         ← Back 
       </Link>
       
-      <TableOfContents headings={headings} activeId={activeHeadingId} />
+      {/* Pass setActiveId to ToC */}
+      <TableOfContents 
+        headings={headings} 
+        activeId={activeHeadingId} 
+        setActiveId={setActiveHeadingId} 
+      />
 
       <article className="prose prose-lg max-w-none">
+        {/* Title uses id='introduction' */}
         <h1 id="introduction" className="text-3xl font-medium scroll-mt-20">{summary.title}</h1>
         <div className="flex items-center gap-4 text-sm text-gray-500 not-prose mb-8">
           <span>{summary.tag_name}</span>
@@ -299,6 +94,7 @@ export default function SummaryPage() {
         </div>
 
         <div id="article-content">
+          {/* Summary uses id='summary-content' */}
           <div id="summary-content" className="prose prose-lg">
             <ReactMarkdown 
               key={`summary-${id}`} 
@@ -322,11 +118,10 @@ export default function SummaryPage() {
           </div>
         </div>
 
-        {/* Sources Section */}
+        {/* Sources Section uses id='sources' */} 
         {newsItems.length > 0 && (
           <>
             <div className="border-t border-gray-200 my-8"></div>
-
             <h2 id="sources" className="text-2xl font-semibold mb-4 scroll-mt-20">Sources</h2>
             <div className="not-prose mb-8">
               <div className="flex flex-wrap gap-2 justify-end mb-4">
