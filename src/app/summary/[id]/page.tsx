@@ -75,7 +75,7 @@ export default function SummaryPage() {
   return (
     <main className="max-w-3xl mx-auto px-4 py-8 min-h-screen relative">
       <Link href="/" className="text-blue-600 hover:underline mb-8 block">
-        ← Back 
+        ← Back
       </Link>
       
       {/* Pass setActiveId to ToC */}
@@ -118,11 +118,10 @@ export default function SummaryPage() {
           </div>
         </div>
 
-        {/* Sources Section uses id='sources' */} 
+        {/* Sources Section uses id='sources' */}
         {newsItems.length > 0 && (
           <>
             <div className="border-t border-gray-200 my-8"></div>
-            <h2 id="sources" className="text-2xl font-semibold mb-4 scroll-mt-20">Sources</h2>
             <div className="not-prose mb-8">
               <div className="flex flex-wrap gap-2 justify-end mb-4">
                 {sortedDomains.map(({ domain, items, favicon }) => (

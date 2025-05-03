@@ -134,7 +134,7 @@ export function useSummaryPageLogic(id: string | undefined) {
       const text = node.textContent?.trim() || '';
       if (!text) return;
 
-      let originalSlug = generateSlug(text);
+      const originalSlug = generateSlug(text);
       let finalId = originalSlug;
       const count = slugCounts.get(originalSlug) || 0;
       if (count > 0) {

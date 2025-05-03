@@ -135,7 +135,7 @@ export default function Home() {
   if (loading && summaries.length === 0) {
     return (
       <main className="flex items-center justify-center min-h-screen">
-        <ScaleLoader color="#4A90E2" />
+        <ScaleLoader color="#14B8A6" />
       </main>
     );
   }

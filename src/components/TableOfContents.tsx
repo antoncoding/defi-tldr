@@ -81,7 +81,7 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ headings, activeId, s
             href="#summary-content"
             onClick={(e) => handleSmoothScroll(e, 'summary-content')}
             className={`block border-l-2 py-1 transition-all duration-200 ease-in-out pl-3 font-medium
-              ${summaryHeadings.length > 0 && activeId === summaryHeadings[0].id ? 'border-teal-500 text-teal-600 dark:text-teal-400' : /* Highlight Summary if first heading is active? Needs refinement */
+              ${summaryHeadings.length > 0 && activeId === summaryHeadings[0].id ? 'border-teal-500 text-teal-600 dark:text-teal-400' :
                  activeId === 'summary-content' ? 'border-teal-500 text-teal-600 dark:text-teal-400' :
                  'border-transparent hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-800 dark:hover:text-slate-200'
               }
